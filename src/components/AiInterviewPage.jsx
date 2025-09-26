@@ -7,6 +7,7 @@ import RecordDoneAnim from "./RecordDoneAnim.jsx";
 import ReAttemptAnim from "./ReAttemptAnim.jsx";
 import { jsPDF } from "jspdf";
 import submitedGif from "../assets/gif/downloadGif.gif"
+import hellogif from "../assets/gif/hellogif.gif"
 
 function AiInterviewPage() {
 
@@ -391,8 +392,13 @@ return <div className="errorPop-up"><p>{playWarning}</p></div>
     <div className="main-page">
   
       {!started ? (
+        <div className="start-text-message-wrap">
+          <div className="helloGif-wrap"><img src={hellogif} alt="hellogif" /></div>
+          <div className="tart-text-message"><p>Step into your AI Web Development interview – prove your expertise!
+        </p></div>
         <button className="start-button" onClick={handleStart}>  ▶️  Start AI Interview
         </button>
+        </div>
       ) : (
         <div> {!initialCountdownDone && countdown > 0 ? 
         ( <p className="Interview-countDown-text"><div className="text-message-info"><span className="wave-container">Ai Interview will start in <strong>{countdown}</strong> seconds <span className="wave-text">

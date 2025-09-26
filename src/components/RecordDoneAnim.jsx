@@ -6,7 +6,7 @@ function RecordDoneAnim() {
  <img src={acceptedgif} alt="acceptedgif" />
 </div>
 
-<div className="text-message-info"> ✅ Accepted! Go to the next question <span className="wave-container">
+<div className="text-message-info"> <span className='emoji-icons'>✅ </span> Well done! Go to the next question <span className="wave-container">
     <span className="wave-text">
         <span>.</span><span>.</span><span>.</span>
     </span>
