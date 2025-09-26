@@ -351,31 +351,39 @@ const aiReadingText = ()=>{
 }
 
 
-const downloadTXT = ()=> {
 
-   const quesData =  questionData;
 
-   const storedName = sessionStorage.getItem("result")
+const downloadTXT = () => {
+  const quesData = questionData; 
+  const storedName = sessionStorage.getItem("result") || "[]";
+  let resultArray = JSON.parse(storedName);
+  resultArray = resultArray.slice(0, quesData.length);
+
+  if (window.pdfGenerating) return;
+  window.pdfGenerating = true;
+  setTimeout(() => { window.pdfGenerating = false; }, 1000);
+
+  const doc = new jsPDF();
+  doc.setFont("helvetica", "normal");
+  let y = 20; 
+  quesData.forEach((item, i) => {
+
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${i + 1}. Qus: ${item}`, 10, y);
+
+    doc.setTextColor(0, 0, 200);
+    doc.text(`Ans: ${resultArray[i] || ""}`, 10, y + 10);
+
+    y += 25; 
+    if (y > 280) { 
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  doc.save("result.pdf");
   
-      let resultArray = JSON.parse(storedName)||[]
-       resultArray = [...new Map(resultArray.map((ans, idx) => [idx, ans])).values()];
-
-    const doc = new jsPDF();
-    doc.setFont("helvetica", "normal");
-
-   let y = 20;
-quesData.forEach((item, i) => {
-  doc.setTextColor(0, 0, 0);
-  doc.text(`${i + 1}. Qus: ${item}`, 10, y);
-
-  doc.setTextColor(0, 0, 200);
-  doc.text(`Ans: ${resultArray[i] || ""}`, 10, y + 10);
-
-  y += 25; 
-});
-
-    doc.save("result.pdf");
-}
+};
 
 
 const errorPopuo = ()=>{
