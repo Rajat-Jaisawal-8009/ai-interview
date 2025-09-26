@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import audioData from "../assets/quesAudio/quesAudio.js";
 import {questionData} from "../assets/quesAudio/quesAudio.js"
 import VoiceLoader from "./VoiceLoader.jsx";
@@ -351,25 +351,28 @@ const aiReadingText = ()=>{
 }
 
 
-function downloadTXT() {
+const downloadTXT = ()=> {
 
    const quesData =  questionData;
 
-   const storedName = sessionStorage.getItem("result");
+   const storedName = sessionStorage.getItem("result")
   
-      let resultArray = JSON.parse(storedName)
-
+      let resultArray = JSON.parse(storedName)||[]
+       resultArray = [...new Map(resultArray.map((ans, idx) => [idx, ans])).values()];
 
     const doc = new jsPDF();
     doc.setFont("helvetica", "normal");
 
-    quesData.forEach((item, i) => {
-      doc.setTextColor(0, 0, 0);
-      doc.text(`${i + 1}. Qus: ${item}`, 10, 20 + i * 20);
+   let y = 20;
+quesData.forEach((item, i) => {
+  doc.setTextColor(0, 0, 0);
+  doc.text(`${i + 1}. Qus: ${item}`, 10, y);
 
-      doc.setTextColor(0, 0, 200);
-      doc.text(`    Ans: ${resultArray[i]}`, 10, 30 + i * 20);
-    });
+  doc.setTextColor(0, 0, 200);
+  doc.text(`Ans: ${resultArray[i] || ""}`, 10, y + 10);
+
+  y += 25; 
+});
 
     doc.save("result.pdf");
 }
