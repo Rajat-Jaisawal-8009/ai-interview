@@ -22,18 +22,26 @@ body {
   place-items: center;
   transition: background-color var(--trans-dur);
 }
+
+.totle-questions-no {
+  color: #a0a0a0 !important;
+  font-size: 13px;
+  display: flex;
+  justify-content: center;
+}
+
 .start-text-message-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .tart-text-message p {
-    color: white;
-    padding: 0 74px;
-    margin-bottom: 50px;
-    text-align: center;
+  color: white;
+  padding: 0 74px;
+  margin-bottom: 50px;
+  text-align: center;
 }
 
 .aiSpeackAnim,
@@ -79,10 +87,11 @@ body {
 }
 
 .disable-btn {
-    background: #eeeeee3b !important;
-    cursor: not-allowed !important;
-    color: #c5c5c5cc !important;
+  background: #eeeeee3b !important;
+  cursor: not-allowed !important;
+  color: #c5c5c5cc !important;
 }
+
 .main-page {
   height: 100vh;
   width: 100%;

@@ -31,7 +31,6 @@ function AiInterviewPage() {
     setCountdown(3); 
   };
 
-  
   const nextHandle = () => {
     if (audioRef.current) {
       audioRef.current.pause();       
@@ -43,7 +42,6 @@ function AiInterviewPage() {
     // setUserTranscript("");
   };
 
-  
   useEffect(() => {
     if (!started || initialCountdownDone) return;
 
@@ -164,7 +162,6 @@ function AiInterviewPage() {
     }, 4000);
   };
 
-
   recognition.onresult = (event) => {
 
     let interimTranscript = "";
@@ -203,12 +200,7 @@ function AiInterviewPage() {
       "Recognition aborted.")
 
   }
-
     };
-
-
-
-
 
    recognition.start()
     setListening(true);
@@ -217,7 +209,7 @@ function AiInterviewPage() {
     };
 
 
-///////////////
+
    useEffect(() => {
     const audioEl = audioRef.current;
     if (!audioEl) return;
@@ -237,44 +229,37 @@ const clearAndReTry = () => {
     copy[nextQuesValue] = ''; 
     return copy;
   });
-
   
   // setUserTranscript("");
 
-  
   if (recognition) {
     recognition.abort();
   }
 
-  
   handleEnded();
 };
 
 const repeatAudio = () => {
   if (!audioRef.current) return;
 
-  
+
   if (recognition) {
     recognition.abort();
     setListening(false);
   }
 
-  
   // setUserTranscript("");
 
-  
   setFinalTranscript(prev => {
     const copy = [...prev];
     copy[nextQuesValue] = '';
     return copy;
   });
 
-  
   audioRef.current.pause();
   audioRef.current.currentTime = 0;
   setAudioFinished(false);
 
-  
   audioRef.current.play() .then(() => {
             if (audioRef.current.muted || audioRef.current.volume === 0) {
         alert("⚠️ Audio is muted in your browser/tab. Please unmute to hear sound.");
@@ -309,8 +294,6 @@ const isNextDisabled = () => {
   const answer = finalTranscript[nextQuesValue];
   return !audioFinished || listening || !answer || answer.trim().length === 0;
 };
-
-
 
 
 useEffect(()=>{
@@ -375,8 +358,6 @@ function downloadTXT() {
     doc.save("result.pdf");
 }
 
-
-
 const errorPopuo = ()=>{
   if(!supported || supportWarning !== ""){
 return (<div className="errorPop-up"><p>{supportWarning}</p></div>)
@@ -386,9 +367,6 @@ return <div className="errorPop-up"><p>{playWarning}</p></div>
     return false;
   }
 }
-
-
-
 
    return (
     <div className="main-page">
@@ -403,18 +381,19 @@ return <div className="errorPop-up"><p>{playWarning}</p></div>
         </div>
       ) : (
         <div> {!initialCountdownDone && countdown > 0 ? 
-        ( <p className="Interview-countDown-text"><div className="text-message-info"><span className="wave-container">Ai Interview will start in <strong>{countdown}</strong> seconds <span className="wave-text">
+        ( <div className="Interview-countDown-text"><div className="text-message-info"><span className="wave-container">Ai Interview will start in <strong>{countdown}</strong> seconds <span className="wave-text">
         <span>.</span><span>.</span><span>.</span>
     </span>
 </span>
-</div></p> )
+</div></div> )
          : 
          !submitForm ?(<div>
           <div className="voise-animation-wraper">
         
             {aiReadingText()}
-                {errorPopuo()}
+             {errorPopuo()}
             </div>
+          <div className="totle-questions-no"><span>{nextQuesValue+1}</span>/<span>{audioData.length}</span></div>
           <div className="control-btn-wraper">
           <div className="Repeat-btn-wrap">{ !audioFinished?<button className="disable-btn" disabled>Repeat</button>:<button onClick={repeatAudio} >Repeat</button>}</div>
           <div className="Re-attempt-btn-wrap">{(!audioFinished || listening)?<button className="disable-btn" disabled>Re-attempt</button>:<button onClick={clearAndReTry}>Re-attempt</button>}</div>
