@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import audioData from "../assets/quesAudio/quesAudio.js";
 import {questionData} from "../assets/quesAudio/quesAudio.js"
 import VoiceLoader from "./VoiceLoader.jsx";
@@ -315,7 +315,8 @@ const isNextDisabled = () => {
 
 useEffect(()=>{
   if(finalTranscript.length>0 && finalTranscript[0].length>0){
- sessionStorage.setItem("result", JSON.stringify(finalTranscript));
+     sessionStorage.removeItem("result");
+     sessionStorage.setItem("result", JSON.stringify(finalTranscript));
   }
 
 },[finalTranscript])
@@ -351,39 +352,29 @@ const aiReadingText = ()=>{
 }
 
 
+function downloadTXT() {
 
+   const quesData =  questionData;
 
-const downloadTXT = () => {
-  const quesData = questionData; 
-  const storedName = sessionStorage.getItem("result") || "[]";
-  let resultArray = JSON.parse(storedName);
-  resultArray = resultArray.slice(0, quesData.length);
-
-  if (window.pdfGenerating) return;
-  window.pdfGenerating = true;
-  setTimeout(() => { window.pdfGenerating = false; }, 1000);
-
-  const doc = new jsPDF();
-  doc.setFont("helvetica", "normal");
-  let y = 20; 
-  quesData.forEach((item, i) => {
-
-    doc.setTextColor(0, 0, 0);
-    doc.text(`${i + 1}. Qus: ${item}`, 10, y);
-
-    doc.setTextColor(0, 0, 200);
-    doc.text(`Ans: ${resultArray[i] || ""}`, 10, y + 10);
-
-    y += 25; 
-    if (y > 280) { 
-      doc.addPage();
-      y = 20;
-    }
-  });
-
-  doc.save("result.pdf");
+   const storedName = sessionStorage.getItem("result")||[];
   
-};
+      let resultArray = JSON.parse(storedName)
+
+
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "normal");
+
+    quesData.forEach((item, i) => {
+      doc.setTextColor(0, 0, 0);
+      doc.text(`${i + 1}. Qus: ${item}`, 10, 20 + i * 20);
+
+      doc.setTextColor(0, 0, 200);
+      doc.text(`    Ans: ${resultArray[i]}`, 10, 30 + i * 20);
+    });
+
+    doc.save("result.pdf");
+}
+
 
 
 const errorPopuo = ()=>{
