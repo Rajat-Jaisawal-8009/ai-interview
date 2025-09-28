@@ -188,6 +188,8 @@ function AiInterviewPage() {
                 return copy;
             });
         };
+         finalResultindex = i+1
+
     };
 //     // setUserTranscript(accumulatedTranscript + interimTranscript); 
     resetSilenceTimer(); 
