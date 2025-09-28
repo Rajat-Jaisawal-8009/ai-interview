@@ -145,7 +145,7 @@ function AiInterviewPage() {
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.interimResults = false;
     recognition.lang = "en-US"
 
       let silenceTimer;
@@ -163,7 +163,8 @@ function AiInterviewPage() {
   };
 
   recognition.onresult = (event) => {
- let interimTranscript = "";
+    console.log(event)
+//  let interimTranscript = "";
     
 
     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -175,7 +176,7 @@ function AiInterviewPage() {
             setFinalTranscript(prev => {
                 const copy = [...prev];
        
-                copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + ' ';
+                copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + '';
                 return copy;
             });
 
@@ -185,7 +186,7 @@ function AiInterviewPage() {
         }
     }
 
-    // setUserTranscript(accumulatedTranscript + interimTranscript); 
+//     // setUserTranscript(accumulatedTranscript + interimTranscript); 
     resetSilenceTimer(); 
   };
     recognition.onerror = (event) => {
@@ -344,27 +345,35 @@ const aiReadingText = ()=>{
 
 
 function downloadTXT() {
+  const quesData = questionData;
 
-   const quesData =  questionData;
+  const storedName = sessionStorage.getItem("result") || "[]";
+  let resultArray = JSON.parse(storedName);
 
-   const storedName = sessionStorage.getItem("result")||[];
-  
-      let resultArray = JSON.parse(storedName)
+  const doc = new jsPDF();
+  doc.setFont("helvetica", "normal");
+
+  let y = 15; 
+
+  quesData.forEach((item, i) => {
+ 
+    doc.setTextColor(0, 0, 0);
+    let questionText = `${i + 1}. Qus: ${item}`;
+    let splitQues = doc.splitTextToSize(questionText, 180); 
+    doc.text(splitQues, 10, y);
+    y += splitQues.length * 10; 
 
 
-    const doc = new jsPDF();
-    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 200);
+    let answerText = `Ans: ${resultArray[i] || ""}`;
+    let splitAns = doc.splitTextToSize(answerText, 180);
+    doc.text(splitAns, 10, y); 
+    y += splitAns.length * 10 + 10; 
+  });
 
-    quesData.forEach((item, i) => {
-      doc.setTextColor(0, 0, 0);
-      doc.text(`${i + 1}. Qus: ${item}`, 10, 20 + i * 20);
-
-      doc.setTextColor(0, 0, 200);
-      doc.text(`    Ans: ${resultArray[i]}`, 10, 30 + i * 20);
-    });
-
-    doc.save("result.pdf");
+  doc.save("result.pdf");
 }
+
 
 const errorPopuo = ()=>{
   if(!supported || supportWarning !== ""){
