@@ -123,91 +123,178 @@ function AiInterviewPage() {
   }, [nextQuesValue]);
 
 
- const handleEnded = () => {
+//  const handleEnded = () => {
   
-      setAudioFinished(true);
+//       setAudioFinished(true);
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+//     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-      setSupported(false);
-      setSupportWarning(
-        "⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge."
-      );
-        // alert("⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge.")
-      return;
-    }else{
-       setSupported(true);
-      setSupportWarning(
-        ""
-      );
-    }
+//     if (!SpeechRecognition) {
+//       setSupported(false);
+//       setSupportWarning(
+//         "⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge."
+//       );
+//         // alert("⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge.")
+//       return;
+//     }else{
+//        setSupported(true);
+//       setSupportWarning(
+//         ""
+//       );
+//     }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US"
+//     const recognition = new SpeechRecognition();
+//     recognition.continuous = true;
+//     recognition.interimResults = true;
+//     recognition.lang = "en-US"
 
-      let silenceTimer;
-  let accumulatedTranscript = ""; 
- const resetSilenceTimer = () => {
+//       let silenceTimer;
+//   let accumulatedTranscript = ""; 
+//  const resetSilenceTimer = () => {
+//     if (silenceTimer) clearTimeout(silenceTimer);
+//     silenceTimer = setTimeout(() => {
+//       recognition.stop();
+//       setListening(false);
+    
+//       if (accumulatedTranscript.trim() !== "") {
+//         setFinalTranscript(prev => [...prev, accumulatedTranscript.trim()]);
+//       }
+//     }, 4000);
+//   };
+
+//   recognition.onresult = (event) => {
+
+//     let interimTranscript = "";
+//     for (let i = event.resultIndex; i < event.results.length; i++) {
+//       const result = event.results[i][0].transcript;
+//       interimTranscript += result;
+//       if (event.results[i].isFinal) {
+//       setFinalTranscript(prev => {
+//         const copy = [...prev];
+//         copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + ' ';
+//         return copy;
+//       });
+//       }
+//     }
+
+//     // setUserTranscript(accumulatedTranscript + interimTranscript); 
+//     resetSilenceTimer(); 
+//   };
+//     recognition.onerror = (event) => {
+//         if(event.error === "not-allowed" || event.error === "service-not-allowed") {
+//            setSupported(false);
+//            setSupportWarning(
+//        "⚠️ Microphone access denied. Please allow microphone permission."
+//       );
+//     // alert("⚠️ Microphone access denied. Please allow microphone permission.");
+//     setListening(false);
+//   } else if(event.error === "network") {
+//            setSupported(false);
+//            setSupportWarning(
+//        "⚠️ Network error in Speech Recognition."
+//       );
+//     alert("⚠️ Network error in Speech Recognition.");
+//   } else if(event.error === "aborted") {
+//      setSupported(false);
+//            setSupportWarning(
+//       "Recognition aborted.")
+
+//   }
+//     };
+
+//    recognition.start()
+//     setListening(true);
+//     setRecognition(recognition);
+//       resetSilenceTimer();
+//     };
+
+const handleEnded = () => {
+  setAudioFinished(true);
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    setSupported(false);
+    setSupportWarning(
+      "⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge."
+    );
+    return;
+  } else {
+    setSupported(true);
+    setSupportWarning("");
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = "en-US";
+
+  let silenceTimer;
+  let accumulatedTranscript = "";
+
+  const resetSilenceTimer = () => {
     if (silenceTimer) clearTimeout(silenceTimer);
     silenceTimer = setTimeout(() => {
       recognition.stop();
       setListening(false);
-    
+
       if (accumulatedTranscript.trim() !== "") {
-        setFinalTranscript(prev => [...prev, accumulatedTranscript.trim()]);
+        setFinalTranscript((prev) => [...prev, accumulatedTranscript.trim()]);
+        accumulatedTranscript = ""; 
       }
     }, 4000);
   };
 
   recognition.onresult = (event) => {
-
     let interimTranscript = "";
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const result = event.results[i][0].transcript;
-      interimTranscript += result;
+    let finalChunk = "";
+
+    
+    for (let i = 0; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
       if (event.results[i].isFinal) {
-      setFinalTranscript(prev => {
-        const copy = [...prev];
-        copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + ' ';
-        return copy;
-      });
+        finalChunk += transcript + " ";
+      } else {
+        interimTranscript += transcript;
       }
     }
 
-    // setUserTranscript(accumulatedTranscript + interimTranscript); 
-    resetSilenceTimer(); 
+    
+    if (finalChunk.trim() !== "") {
+      accumulatedTranscript += finalChunk;
+      setFinalTranscript((prev) => {
+        const copy = [...prev];
+        copy[nextQuesValue] = (copy[nextQuesValue] || "") + finalChunk;
+        return copy;
+      });
+    }
+
+    resetSilenceTimer();
   };
-    recognition.onerror = (event) => {
-        if(event.error === "not-allowed" || event.error === "service-not-allowed") {
-           setSupported(false);
-           setSupportWarning(
-       "⚠️ Microphone access denied. Please allow microphone permission."
+
+  recognition.onerror = (event) => {
+    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+      setSupported(false);
+      setSupportWarning(
+        "⚠️ Microphone access denied. Please allow microphone permission."
       );
-    // alert("⚠️ Microphone access denied. Please allow microphone permission.");
-    setListening(false);
-  } else if(event.error === "network") {
-           setSupported(false);
-           setSupportWarning(
-       "⚠️ Network error in Speech Recognition."
-      );
-    alert("⚠️ Network error in Speech Recognition.");
-  } else if(event.error === "aborted") {
-     setSupported(false);
-           setSupportWarning(
-      "Recognition aborted.")
+      setListening(false);
+    } else if (event.error === "network") {
+      setSupported(false);
+      setSupportWarning("⚠️ Network error in Speech Recognition.");
+      alert("⚠️ Network error in Speech Recognition.");
+    } else if (event.error === "aborted") {
+      setSupported(false);
+      setSupportWarning("Recognition aborted.");
+    }
+  };
 
-  }
-    };
-
-   recognition.start()
-    setListening(true);
-    setRecognition(recognition);
-      resetSilenceTimer();
-    };
-
+  recognition.start();
+  setListening(true);
+  setRecognition(recognition);
+  resetSilenceTimer();
+};
 
 
    useEffect(() => {
@@ -335,28 +422,57 @@ const aiReadingText = ()=>{
 }
 
 
-function downloadTXT() {
+// function downloadTXT() {
 
-   const quesData =  questionData;
+//    const quesData =  questionData;
 
-   const storedName = sessionStorage.getItem("result")||[];
+//    const storedName = sessionStorage.getItem("result")||[];
   
-      let resultArray = JSON.parse(storedName)
+//       let resultArray = JSON.parse(storedName)
 
 
-    const doc = new jsPDF();
-    doc.setFont("helvetica", "normal");
+//     const doc = new jsPDF();
+//     doc.setFont("helvetica", "normal");
 
-    quesData.forEach((item, i) => {
-      doc.setTextColor(0, 0, 0);
-      doc.text(`${i + 1}. Qus: ${item}`, 10, 20 + i * 20);
+//     quesData.forEach((item, i) => {
+//       doc.setTextColor(0, 0, 0);
+//       doc.text(`${i + 1}. Qus: ${item}`, 10, 20 + i * 20);
 
-      doc.setTextColor(0, 0, 200);
-      doc.text(`    Ans: ${resultArray[i]}`, 10, 30 + i * 20);
-    });
+//       doc.setTextColor(0, 0, 200);
+//       doc.text(`    Ans: ${resultArray[i]}`, 10, 30 + i * 20);
+//     });
 
-    doc.save("result.pdf");
+//     doc.save("result.pdf");
+// }
+
+function downloadTXT() {
+  const quesData = questionData;
+
+  const storedName = sessionStorage.getItem("result") || "[]";
+  let resultArray = JSON.parse(storedName);
+
+  const doc = new jsPDF();
+  doc.setFont("helvetica", "normal");
+
+  let y = 20; 
+  quesData.forEach((item, i) => {
+
+    doc.setTextColor(0, 0, 0);
+    let questionText = `${i + 1}. Qus: ${item}`;
+    let splitQues = doc.splitTextToSize(questionText, 180); 
+    doc.text(splitQues, 10, y);
+    y += splitQues.length * 10; 
+
+    doc.setTextColor(0, 0, 200);
+    let answerText = `Ans: ${resultArray[i] || ""}`;
+    let splitAns = doc.splitTextToSize(answerText, 180);
+    doc.text(splitAns, 15, y); 
+    y += splitAns.length * 10 + 10; 
+  });
+
+  doc.save("result.pdf");
 }
+
 
 const errorPopuo = ()=>{
   if(!supported || supportWarning !== ""){
