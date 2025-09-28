@@ -24,6 +24,7 @@ function AiInterviewPage() {
   const [playWarning, setPlayWarning] = useState("");
   const [finalTranscript,setFinalTranscript] = useState([])
   const [submitForm, setSubmitForm] = useState(false)
+  const [item, setItem] = useState("")
 
 
   const handleStart = () => {
@@ -145,7 +146,7 @@ function AiInterviewPage() {
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.lang = "en-US"
 
       let silenceTimer;
@@ -156,39 +157,46 @@ function AiInterviewPage() {
       recognition.stop();
       setListening(false);
     
-      if (accumulatedTranscript.trim() !== "") {
-        setFinalTranscript(prev => [...prev, accumulatedTranscript.trim()]);
-      }
+      // if (accumulatedTranscript.trim() !== "") {
+      //   setFinalTranscript(prev => [...prev, accumulatedTranscript.trim()]);
+      // }
     }, 4000);
   };
 
   recognition.onresult = (event) => {
-    console.log(event)
-//  let interimTranscript = "";
-    
 
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i][0].transcript;
-        const isFinal = event.results[i].isFinal;
-
-        if (isFinal) {
-
-            setFinalTranscript(prev => {
+     setFinalTranscript(prev => {
                 const copy = [...prev];
-       
-                copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + '';
+      copy[nextQuesValue] = "";
+                
                 return copy;
             });
 
-        } else {
- 
-            interimTranscript += result;
-        }
-    }
+ let finalResultindex = 0
 
+    for (let i = finalResultindex; i < event.results.length; i++) {
+        const result = event.results[i][0].transcript;
+        const isFinal = event.results[i].isFinal;
+
+
+        if (isFinal) {
+
+ setFinalTranscript(prev => {
+                const copy = [...prev];
+      
+                copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + '';
+                return copy;
+            });
+        };
+    };
 //     // setUserTranscript(accumulatedTranscript + interimTranscript); 
     resetSilenceTimer(); 
   };
+
+
+
+
+
     recognition.onerror = (event) => {
         if(event.error === "not-allowed" || event.error === "service-not-allowed") {
            setSupported(false);
@@ -218,6 +226,7 @@ function AiInterviewPage() {
     };
 
 
+ 
 
    useEffect(() => {
     const audioEl = audioRef.current;
