@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Children } from "react";
 import audioData from "../assets/quesAudio/quesAudio.js";
 import {questionData} from "../assets/quesAudio/quesAudio.js"
 import VoiceLoader from "./VoiceLoader.jsx";
@@ -163,18 +163,26 @@ function AiInterviewPage() {
   };
 
   recognition.onresult = (event) => {
+ let interimTranscript = "";
+    
 
-    let interimTranscript = "";
     for (let i = event.resultIndex; i < event.results.length; i++) {
-      const result = event.results[i][0].transcript;
-      interimTranscript += result;
-      if (event.results[i].isFinal) {
-      setFinalTranscript(prev => {
-        const copy = [...prev];
-        copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + ' ';
-        return copy;
-      });
-      }
+        const result = event.results[i][0].transcript;
+        const isFinal = event.results[i].isFinal;
+
+        if (isFinal) {
+
+            setFinalTranscript(prev => {
+                const copy = [...prev];
+       
+                copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + ' ';
+                return copy;
+            });
+
+        } else {
+ 
+            interimTranscript += result;
+        }
     }
 
     // setUserTranscript(accumulatedTranscript + interimTranscript); 
