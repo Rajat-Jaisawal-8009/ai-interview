@@ -17,14 +17,122 @@ function AiInterviewPage() {
   const [nextQuesValue, setNextQuesValue] = useState(0);
   const [initialCountdownDone, setInitialCountdownDone] = useState(false);
   const [audioFinished, setAudioFinished] = useState(false);
-  const [recognition, setRecognition] = useState(null);        
+  // const [recognition, setRecognition] = useState(null);        
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(true);
   const [supportWarning, setSupportWarning] = useState("");
   const [playWarning, setPlayWarning] = useState("");
   const [finalTranscript,setFinalTranscript] = useState([])
   const [submitForm, setSubmitForm] = useState(false)
-  const [item, setItem] = useState("")
+const textRef = useRef()
+
+const recognitionRef = useRef(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768); // 768px threshold for tablet/mobile
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
+//// Get SpeechRecognition Object
+useEffect(()=>{
+ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setSupported(false);
+      setSupportWarning(
+        "⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge."
+      );
+      
+      return;
+    }else{
+
+    const recognition = new SpeechRecognition();
+    console.log(recognition)
+ 
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US"
+   recognitionRef.current = recognition;
+       setSupported(true);
+      setSupportWarning(
+        ""
+      );
+    }
+
+    return () => {
+  if (recognitionRef.current) recognitionRef.current.stop();
+};
+},[])
+
+
+
+
+
+  ///////Online-Offline Error
+
+ useEffect(() => {
+  const handleOnline = () => {
+    console.log("🌐 Back online!");
+    setSupportWarning("✅ Network restored. Restarting...");
+
+  };
+
+  const handleOffline = () => {
+    console.log("🚫 Offline");
+    setSupportWarning("⚠️ You are offline. Speech recognition paused.");
+
+  };
+
+  window.addEventListener("online", handleOnline);
+  window.addEventListener("offline", handleOffline);
+
+  return () => {
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("offline", handleOffline);
+  };
+}, []);
+
+
+
+///onerror
+useEffect(()=>{
+
+  if(!recognitionRef.current) return;
+recognitionRef.current.onerror = (event) => {
+        if(event.error === "not-allowed" || event.error === "service-not-allowed") {
+           setSupported(false);
+           setSupportWarning(
+       "⚠️ Microphone access denied. Please allow microphone permission."
+      );
+    setListening(false);
+  } else if(event.error === "network") {
+          //  setSupported(false);
+           setSupportWarning(
+       "⚠️ Network error in Speech Recognition."
+      );
+
+  } else if(event.error === "aborted") {
+    //  setSupported(false);
+           setSupportWarning(
+      "Recognition aborted.")
+
+  }
+    };
+
+    return () => {
+  recognitionRef.current.onerror = null;
+};
+
+},[recognitionRef.current])
+
+
 
 
   const handleStart = () => {
@@ -32,7 +140,77 @@ function AiInterviewPage() {
     setCountdown(3); 
   };
 
+
+const handleEnded = () => {
+  console.log(recognitionRef.current)
+  if (!recognitionRef.current) return;
+
+  setAudioFinished(true);
+  let silenceTimer;
+
+  const resetSilenceTimer = () => {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => {
+      recognitionRef.current.stop();
+      setListening(false);
+    }, 4000);
+  };
+
+  recognitionRef.current.onresult = (event) => {
+ 
+console.log("event.results before loop",event.results)
+    let finalResultindex = 0;
+    let text="";
+
+if(isMobile){
+  console.log("isMobile",isMobile)
+  text = event.results[event.results.length-1][0].transcript;
+ 
+}else{
+for (let i = finalResultindex; i < event.results.length; i++) {
+      const result = event.results[i][0].transcript;
+      const isFinal = event.results[i].isFinal;
+  
+      if (isFinal) {
+        console.log("isFinal event.results",event.results)
+        text +=  result
+      }
+      finalResultindex = i + 1;
+    }
+}
+    
+
+textRef.current = text;
+console.log("Text",text)
+
+
+      
+console.log("textRef",textRef.current)
+       setFinalTranscript((prev) => {
+          const copy = [...prev];
+          copy[nextQuesValue] = textRef.current;
+          return copy;
+        });
+     
+
+    resetSilenceTimer();
+  };
+
+  try {
+    recognitionRef.current.start();
+    setListening(true);
+    resetSilenceTimer();
+    setSupportWarning("");
+  } catch (err) {
+    console.error("Recognition start failed:", err);
+    setSupportWarning("⚠️ Unable to start recognition. Please retry.");
+  }
+};
+
+
+  
   const nextHandle = () => {
+   console.log( textRef.current)
     if (audioRef.current) {
       audioRef.current.pause();       
       audioRef.current.currentTime = 0;
@@ -124,108 +302,7 @@ function AiInterviewPage() {
   }, [nextQuesValue]);
 
 
- const handleEnded = () => {
-  
-      setAudioFinished(true);
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      setSupported(false);
-      setSupportWarning(
-        "⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge."
-      );
-        // alert("⚠️ Your browser does not support Speech Recognition. Please use Chrome/Edge.")
-      return;
-    }else{
-       setSupported(true);
-      setSupportWarning(
-        ""
-      );
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US"
-
-      let silenceTimer;
-  let accumulatedTranscript = ""; 
- const resetSilenceTimer = () => {
-    if (silenceTimer) clearTimeout(silenceTimer);
-    silenceTimer = setTimeout(() => {
-      recognition.stop();
-      setListening(false);
-    
-      // if (accumulatedTranscript.trim() !== "") {
-      //   setFinalTranscript(prev => [...prev, accumulatedTranscript.trim()]);
-      // }
-    }, 4000);
-  };
-
-  recognition.onresult = (event) => {
-
-     setFinalTranscript(prev => {
-                const copy = [...prev];
-      copy[nextQuesValue] = "";
-                
-                return copy;
-            });
-
- let finalResultindex = 0
-
-    for (let i = finalResultindex; i < event.results.length; i++) {
-        const result = event.results[i][0].transcript;
-        const isFinal = event.results[i].isFinal;
-
-
-        if (isFinal) {
-
- setFinalTranscript(prev => {
-                const copy = [...prev];
-      
-                copy[nextQuesValue] = (copy[nextQuesValue] || '') + result + '';
-                return copy;
-            });
-        };
-         finalResultindex = i+1
-
-    };
-//     // setUserTranscript(accumulatedTranscript + interimTranscript); 
-    resetSilenceTimer(); 
-  };
-
-
-
-
-
-    recognition.onerror = (event) => {
-        if(event.error === "not-allowed" || event.error === "service-not-allowed") {
-           setSupported(false);
-           setSupportWarning(
-       "⚠️ Microphone access denied. Please allow microphone permission."
-      );
-    // alert("⚠️ Microphone access denied. Please allow microphone permission.");
-    setListening(false);
-  } else if(event.error === "network") {
-           setSupported(false);
-           setSupportWarning(
-       "⚠️ Network error in Speech Recognition."
-      );
-    alert("⚠️ Network error in Speech Recognition.");
-  } else if(event.error === "aborted") {
-     setSupported(false);
-           setSupportWarning(
-      "Recognition aborted.")
-
-  }
-    };
-
-   recognition.start()
-    setListening(true);
-    setRecognition(recognition);
-      resetSilenceTimer();
-    };
 
 
  
@@ -249,11 +326,10 @@ const clearAndReTry = () => {
     copy[nextQuesValue] = ''; 
     return copy;
   });
-  
-  // setUserTranscript("");
 
-  if (recognition) {
-    recognition.abort();
+
+  if (recognitionRef.current) {
+    recognitionRef.current.abort();
   }
 
   handleEnded();
@@ -263,8 +339,8 @@ const repeatAudio = () => {
   if (!audioRef.current) return;
 
 
-  if (recognition) {
-    recognition.abort();
+  if (recognitionRef.current) {
+    recognitionRef.current.abort();
     setListening(false);
   }
 
@@ -446,3 +522,4 @@ return <div className="errorPop-up"><p>{playWarning}</p></div>
 }
 
 export default AiInterviewPage;
+
