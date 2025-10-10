@@ -17,7 +17,6 @@ function AiInterviewPage() {
   const [nextQuesValue, setNextQuesValue] = useState(0);
   const [initialCountdownDone, setInitialCountdownDone] = useState(false);
   const [audioFinished, setAudioFinished] = useState(false);
-  // const [recognition, setRecognition] = useState(null);        
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(true);
   const [supportWarning, setSupportWarning] = useState("");
@@ -31,7 +30,7 @@ const recognitionRef = useRef(null)
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768); // 768px threshold for tablet/mobile
+      setIsMobile(window.innerWidth < 768); 
     };
 
     window.addEventListener("resize", handleResize);
@@ -210,6 +209,7 @@ console.log("textRef",textRef.current)
 
   
   const nextHandle = () => {
+      setSupportWarning("");
    console.log( textRef.current)
     if (audioRef.current) {
       audioRef.current.pause();       
@@ -336,6 +336,7 @@ const clearAndReTry = () => {
 };
 
 const repeatAudio = () => {
+        setSupportWarning("");
   if (!audioRef.current) return;
 
 
@@ -344,7 +345,7 @@ const repeatAudio = () => {
     setListening(false);
   }
 
-  // setUserTranscript("");
+
 
   setFinalTranscript(prev => {
     const copy = [...prev];
@@ -440,26 +441,42 @@ function downloadTXT() {
   const doc = new jsPDF();
   doc.setFont("helvetica", "normal");
 
-  let y = 15; 
+  let y = 15;
+  const pageHeight = doc.internal.pageSize.height; 
 
   quesData.forEach((item, i) => {
- 
+
     doc.setTextColor(0, 0, 0);
     let questionText = `${i + 1}. Qus: ${item}`;
-    let splitQues = doc.splitTextToSize(questionText, 180); 
+    let splitQues = doc.splitTextToSize(questionText, 180);
+
+
+    if (y + splitQues.length * 10 > pageHeight - 20) {
+      doc.addPage();
+      y = 20; 
+    }
+
     doc.text(splitQues, 10, y);
-    y += splitQues.length * 10; 
+    y += splitQues.length * 10;
 
 
     doc.setTextColor(0, 0, 200);
     let answerText = `Ans: ${resultArray[i] || ""}`;
     let splitAns = doc.splitTextToSize(answerText, 180);
-    doc.text(splitAns, 10, y); 
-    y += splitAns.length * 10 + 10; 
+
+
+    if (y + splitAns.length * 10 > pageHeight - 20) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.text(splitAns, 10, y);
+    y += splitAns.length * 10 + 10;
   });
 
-  doc.save("result.pdf");
+  doc.save("AIinterviewResult.pdf");
 }
+
 
 
 const errorPopuo = ()=>{
