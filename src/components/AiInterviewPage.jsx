@@ -195,15 +195,13 @@ textRef.current = text;
     resetSilenceTimer();
   };
 
-  try {
+  
     recognitionRef.current.start();
     setListening(true);
     resetSilenceTimer();
     setSupportWarning("");
-  } catch (err) {
-    console.error("Recognition start failed:", err);
-    setSupportWarning("⚠️ Unable to start recognition. Please retry.");
-  }
+ 
+  
 };
 
 
