@@ -53,7 +53,7 @@ useEffect(()=>{
     }else{
 
     const recognition = new SpeechRecognition();
-    console.log(recognition)
+    // console.log(recognition)
  
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -78,13 +78,13 @@ useEffect(()=>{
 
  useEffect(() => {
   const handleOnline = () => {
-    console.log("🌐 Back online!");
+    // console.log("🌐 Back online!");
     setSupportWarning("✅ Network restored. Restarting...");
 
   };
 
   const handleOffline = () => {
-    console.log("🚫 Offline");
+    // console.log("🚫 Offline");
     setSupportWarning("⚠️ You are offline. Speech recognition paused.");
 
   };
@@ -141,7 +141,7 @@ recognitionRef.current.onerror = (event) => {
 
 
 const handleEnded = () => {
-  console.log(recognitionRef.current)
+  // console.log(recognitionRef.current)
   if (!recognitionRef.current) return;
 
   setAudioFinished(true);
@@ -157,12 +157,12 @@ const handleEnded = () => {
 
   recognitionRef.current.onresult = (event) => {
  
-console.log("event.results before loop",event.results)
+// console.log("event.results before loop",event.results)
     let finalResultindex = 0;
     let text="";
 
 if(isMobile){
-  console.log("isMobile",isMobile)
+  // console.log("isMobile",isMobile)
   text = event.results[event.results.length-1][0].transcript;
  
 }else{
@@ -171,7 +171,7 @@ for (let i = finalResultindex; i < event.results.length; i++) {
       const isFinal = event.results[i].isFinal;
   
       if (isFinal) {
-        console.log("isFinal event.results",event.results)
+        // console.log("isFinal event.results",event.results)
         text +=  result
       }
       finalResultindex = i + 1;
@@ -180,11 +180,11 @@ for (let i = finalResultindex; i < event.results.length; i++) {
     
 
 textRef.current = text;
-console.log("Text",text)
+// console.log("Text",text)
 
 
       
-console.log("textRef",textRef.current)
+// console.log("textRef",textRef.current)
        setFinalTranscript((prev) => {
           const copy = [...prev];
           copy[nextQuesValue] = textRef.current;
@@ -210,7 +210,7 @@ console.log("textRef",textRef.current)
   
   const nextHandle = () => {
       setSupportWarning("");
-   console.log( textRef.current)
+  //  console.log( textRef.current)
     if (audioRef.current) {
       audioRef.current.pause();       
       audioRef.current.currentTime = 0;
@@ -461,7 +461,7 @@ function downloadTXT() {
 
 
     doc.setTextColor(0, 0, 200);
-    let answerText = `Ans: ${resultArray[i] || ""}`;
+    let answerText = `Ans:-  ${resultArray[i] || ""}`;
     let splitAns = doc.splitTextToSize(answerText, 180);
 
 
@@ -471,7 +471,7 @@ function downloadTXT() {
     }
 
     doc.text(splitAns, 10, y);
-    y += splitAns.length * 10 + 10;
+    y += splitAns.length * 10 + 5;
   });
 
   doc.save("AIinterviewResult.pdf");
@@ -499,6 +499,7 @@ return <div className="errorPop-up"><p>{playWarning}</p></div>
         </p></div>
         <button className="start-button" onClick={handleStart}>  ▶️  Start AI Interview
         </button>
+        <div className="developerName"><span>Developed by -</span> <span className="nameText">Rajat Jaiswal</span></div>
         </div>
       ) : (
         <div> {!initialCountdownDone && countdown > 0 ? 

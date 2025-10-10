@@ -582,3 +582,9 @@ button:hover {
     transform: translateY(-2px);
   }
 }
+
+.developerName {
+    color: #8c8c8c;
+    margin-top: 50px;
+    font-size: 10px;
+}
