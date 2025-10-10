@@ -143,7 +143,7 @@ recognitionRef.current.onerror = (event) => {
 const handleEnded = () => {
   // console.log(recognitionRef.current)
   if (!recognitionRef.current) return;
-
+  setSupportWarning("");
   setAudioFinished(true);
   let silenceTimer;
 
