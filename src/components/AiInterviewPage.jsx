@@ -431,7 +431,6 @@ const aiReadingText = ()=>{
   }
 }
 
-
 function downloadTXT() {
   const quesData = questionData;
 
@@ -442,40 +441,44 @@ function downloadTXT() {
   doc.setFont("helvetica", "normal");
 
   let y = 15;
-  const pageHeight = doc.internal.pageSize.height; 
+  const pageHeight = doc.internal.pageSize.height;
 
   quesData.forEach((item, i) => {
 
     doc.setTextColor(0, 0, 0);
     let questionText = `${i + 1}. Qus: ${item}`;
     let splitQues = doc.splitTextToSize(questionText, 180);
+    let quesHeight = splitQues.length * 7; 
 
-
-    if (y + splitQues.length * 10 > pageHeight - 20) {
+    if (y + quesHeight > pageHeight - 20) {
       doc.addPage();
-      y = 20; 
+      y = 20;
     }
 
     doc.text(splitQues, 10, y);
-    y += splitQues.length * 10;
+    y += quesHeight + 5; 
 
 
     doc.setTextColor(0, 0, 200);
-    let answerText = `Ans:-  ${resultArray[i] || ""}`;
+    let answerText = `Ans: ${resultArray[i] || ""}`;
     let splitAns = doc.splitTextToSize(answerText, 180);
+    let ansHeight = splitAns.length * 7; 
 
-
-    if (y + splitAns.length * 10 > pageHeight - 20) {
+    if (y + ansHeight > pageHeight - 20) {
       doc.addPage();
       y = 20;
     }
 
     doc.text(splitAns, 10, y);
-    y += splitAns.length * 10 + 5;
+    y += ansHeight;
+
+
+    y += 15; 
   });
 
-  doc.save("AIinterviewResult.pdf");
+  doc.save("AiInterviewResult.pdf");
 }
+
 
 
 
